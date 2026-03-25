@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Future Commerce</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon-cyan: #00f5ff;
+    --neon-pink: #ff006e;
+    --neon-purple: #9b00ff;
+    --neon-green: #00ff9f;
+    --dark-base: #030810;
+    --dark-2: #070f1c;
+    --dark-3: #0d1a2e;
+    --dark-surface: #0a1628;
+    --text-bright: #e8f4f8;
+    --text-muted: #5a7a9a;
+    --border-glow: rgba(0,245,255,0.2);
+    --grid-color: rgba(0,245,255,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--dark-base);
+    color: var(--text-bright);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  #cursor {
+    width: 12px; height: 12px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s;
+    mix-blend-mode: difference;
+  }
+  #cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(0,245,255,0.5);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease-out, width 0.3s, height 0.3s, border-color 0.3s;
+  }
+  body:has(a:hover) #cursor-ring,
+  body:has(button:hover) #cursor-ring {
+    width: 56px; height: 56px;
+    border-color: var(--neon-pink);
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Scanlines */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed; top: 0; width: 100%;
+    z-index: 100;
+    padding: 0 4rem;
+    height: 72px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(3,8,16,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-glow);
+  }
+
+  .nav-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px rgba(0,245,255,0.5);
+    text-decoration: none;
+  }
+
+  .nav-logo span {
+    color: var(--neon-pink);
+    text-shadow: 0 0 20px rgba(255,0,110,0.5);
+  }
+
+  .nav-links {
+    display: flex; gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 1px;
+    background: var(--neon-cyan);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+  .nav-links a:hover { color: var(--neon-cyan); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  .nav-actions {
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+
+  .nav-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    padding: 0.5rem 1.2rem;
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    cursor: none;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  .nav-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--dark-base);
+    box-shadow: 0 0 20px rgba(0,245,255,0.4);
+  }
+
+  .cart-icon {
+    position: relative;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: none;
+  }
+  .cart-icon svg { stroke: var(--text-muted); transition: stroke 0.3s; }
+  .cart-icon:hover svg { stroke: var(--neon-cyan); }
+  .cart-count {
+    position: absolute; top: 2px; right: 2px;
+    width: 16px; height: 16px;
+    background: var(--neon-pink);
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', monospace;
+    color: white;
+  }
+
+  /* ===== HERO ===== */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 80px 4rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    max-width: 680px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan);
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(3rem, 6vw, 6rem);
+    font-weight: 900;
+    line-height: 0.95;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-title .line-1 { color: var(--text-bright); }
+  .hero-title .line-2 {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--neon-cyan);
+    text-shadow: none;
+  }
+  .hero-title .line-3 {
+    color: var(--neon-pink);
+    text-shadow: 0 0 40px rgba(255,0,110,0.4);
+  }
+
+  .hero-desc {
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+    max-width: 480px;
+  }
+
+  .hero-cta {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    padding: 1rem 2rem;
+    background: var(--neon-cyan);
+    color: var(--dark-base);
+    border: none;
+    cursor: none;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .btn-primary:hover::before { transform: translateX(100%); }
+  .btn-primary:hover { box-shadow: 0 0 30px rgba(0,245,255,0.6), 0 0 60px rgba(0,245,255,0.2); }
+
+  .btn-secondary {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    padding: 1rem 2rem;
+    background: transparent;
+    color: var(--neon-pink);
+    border: 1px solid var(--neon-pink);
+    cursor: none;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .btn-secondary:hover {
+    background: var(--neon-pink);
+    color: white;
+    box-shadow: 0 0 30px rgba(255,0,110,0.5);
+  }
+
+  .hero-stats {
+    position: absolute; right: 4rem; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 2rem;
+    z-index: 2;
+  }
+
+  .stat-item {
+    text-align: right;
+    padding-right: 1.5rem;
+    border-right: 1px solid var(--border-glow);
+    position: relative;
+  }
+  .stat-item::after {
+    content: '';
+    position: absolute; right: -3px; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .stat-item:hover::after { opacity: 1; }
+
+  .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px rgba(0,245,255,0.4);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  /* Hero visual orb */
+  .hero-visual {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 55%;
+    pointer-events: none;
+  }
+
+  .orb-container {
+    position: absolute;
+    top: 50%; right: 10%;
+    transform: translate(0, -50%);
+    width: 500px; height: 500px;
+  }
+
+  .orb-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid;
+    animation: orb-spin linear infinite;
+  }
+
+  .orb-ring-1 {
+    inset: 0;
+    border-color: rgba(0,245,255,0.3);
+    animation-duration: 20s;
+  }
+  .orb-ring-2 {
+    inset: 40px;
+    border-color: rgba(255,0,110,0.2);
+    animation-duration: 15s;
+    animation-direction: reverse;
+    border-style: dashed;
+  }
+  .orb-ring-3 {
+    inset: 80px;
+    border-color: rgba(155,0,255,0.2);
+    animation-duration: 25s;
+  }
+
+  .orb-ring::before {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    top: 50%; left: -4px;
+    margin-top: -4px;
+    box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+  }
+
+  .orb-ring-2::before { background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink); }
+  .orb-ring-3::before { background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple); }
+
+  .orb-core {
+    position: absolute;
+    inset: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%,
+      rgba(0,245,255,0.15) 0%,
+      rgba(155,0,255,0.1) 50%,
+      transparent 70%
+    );
+    border: 1px solid rgba(0,245,255,0.2);
+  }
+
+  .orb-glow {
+    position: absolute;
+    inset: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,245,255,0.05) 0%, transparent 70%);
+    filter: blur(20px);
+  }
+
+  @keyframes orb-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ===== TICKER ===== */
+  .ticker {
+    position: relative;
+    padding: 1rem 0;
+    background: var(--dark-surface);
+    border-top: 1px solid rgba(0,245,255,0.1);
+    border-bottom: 1px solid rgba(0,245,255,0.1);
+    overflow: hidden;
+    z-index: 2;
+  }
+  .ticker::before, .ticker::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    width: 100px; z-index: 1;
+  }
+  .ticker::before { left: 0; background: linear-gradient(90deg, var(--dark-surface), transparent); }
+  .ticker::after { right: 0; background: linear-gradient(-90deg, var(--dark-surface), transparent); }
+
+  .ticker-track {
+    display: flex; gap: 4rem;
+    animation: ticker-scroll 30s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .ticker-item .dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 6px var(--neon-cyan);
+  }
+  .ticker-item .up { color: var(--neon-green); }
+  .ticker-item .down { color: var(--neon-pink); }
+
+  @keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ===== SECTION COMMON ===== */
+  section { position: relative; z-index: 2; }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--text-bright);
+  }
+
+  .section-title em {
+    font-style: normal;
+    color: var(--neon-pink);
+    text-shadow: 0 0 30px rgba(255,0,110,0.4);
+  }
+
+  /* ===== CATEGORIES ===== */
+  #categories {
+    padding: 8rem 4rem;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .cat-card {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    cursor: none;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .cat-card:first-child {
+    grid-row: span 2;
+    height: auto;
+  }
+
+  .cat-card:hover { transform: translateY(-4px); }
+
+  .cat-bg {
+    position: absolute; inset: 0;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .cat-card:hover .cat-bg { transform: scale(1.05); }
+
+  .cat-bg-tech { background: linear-gradient(135deg, #0a1628 0%, #1a0a3e 50%, #0d1a2e 100%); }
+  .cat-bg-fashion { background: linear-gradient(135deg, #1a0a14 0%, #2e0a1a 50%, #1a0a0a 100%); }
+  .cat-bg-audio { background: linear-gradient(135deg, #001a1a 0%, #003333 50%, #001a2e 100%); }
+  .cat-bg-home { background: linear-gradient(135deg, #1a1a00 0%, #2e2e0a 50%, #1a1a0a 100%); }
+  .cat-bg-sports { background: linear-gradient(135deg, #0a001a 0%, #1a003e 50%, #0a0a2e 100%); }
+
+  /* Geometric pattern overlay per card */
+  .cat-pattern {
+    position: absolute; inset: 0;
+    opacity: 0.4;
+  }
+
+  .cat-glow {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0;
+    transition: opacity 0.4s;
+    bottom: -50px; right: -50px;
+  }
+  .cat-card:hover .cat-glow { opacity: 0.6; }
+
+  .cat-tech .cat-glow { background: var(--neon-cyan); }
+  .cat-fashion .cat-glow { background: var(--neon-pink); }
+  .cat-audio .cat-glow { background: var(--neon-green); }
+  .cat-home .cat-glow { background: #ffcc00; }
+  .cat-sports .cat-glow { background: var(--neon-purple); }
+
+  .cat-border {
+    position: absolute; inset: 0;
+    border: 1px solid transparent;
+    transition: border-color 0.4s;
+  }
+  .cat-tech:hover .cat-border { border-color: rgba(0,245,255,0.4); }
+  .cat-fashion:hover .cat-border { border-color: rgba(255,0,110,0.4); }
+  .cat-audio:hover .cat-border { border-color: rgba(0,255,159,0.4); }
+  .cat-home:hover .cat-border { border-color: rgba(255,204,0,0.4); }
+  .cat-sports:hover .cat-border { border-color: rgba(155,0,255,0.4); }
+
+  .cat-content {
+    position: absolute; inset: 0;
+    padding: 2rem;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    background: linear-gradient(to top, rgba(3,8,16,0.9) 0%, transparent 60%);
+  }
+
+  .cat-icon {
+    position: absolute; top: 2rem; right: 2rem;
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    opacity: 0.7;
+  }
+
+  .cat-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .cat-tech .cat-tag { color: var(--neon-cyan); }
+  .cat-fashion .cat-tag { color: var(--neon-pink); }
+  .cat-audio .cat-tag { color: var(--neon-green); }
+  .cat-home .cat-tag { color: #ffcc00; }
+  .cat-sports .cat-tag { color: var(--neon-purple); }
+
+  .cat-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 0.3rem;
+  }
+
+  .cat-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  .cat-arrow {
+    position: absolute; bottom: 2rem; right: 2rem;
+    width: 36px; height: 36px;
+    border: 1px solid;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .cat-card:hover .cat-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .cat-tech .cat-arrow { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+  .cat-fashion .cat-arrow { border-color: var(--neon-pink); color: var(--neon-pink); }
+  .cat-audio .cat-arrow { border-color: var(--neon-green); color: var(--neon-green); }
+  .cat-home .cat-arrow { border-color: #ffcc00; color: #ffcc00; }
+  .cat-sports .cat-arrow { border-color: var(--neon-purple); color: var(--neon-purple); }
+
+  /* SVG geometric patterns per category */
+  .cat-tech .cat-pattern-svg { stroke: rgba(0,245,255,0.15); }
+  .cat-fashion .cat-pattern-svg { stroke: rgba(255,0,110,0.15); }
+  .cat-audio .cat-pattern-svg { stroke: rgba(0,255,159,0.15); }
+  .cat-home .cat-pattern-svg { stroke: rgba(255,204,0,0.15); }
+  .cat-sports .cat-pattern-svg { stroke: rgba(155,0,255,0.15); }
+
+  /* ===== PRODUCTS ===== */
+  #products {
+    padding: 4rem 4rem 8rem;
+  }
+
+  .products-filter {
+    display: flex; gap: 1rem;
+    justify-content: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    padding: 0.5rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--border-glow);
+    color: var(--text-muted);
+    cursor: none;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    background: rgba(0,245,255,0.05);
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .product-card {
+    background: var(--dark-surface);
+    border: 1px solid var(--border-glow);
+    position: relative;
+    cursor: none;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    overflow: hidden;
+  }
+
+  .product-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(0,245,255,0.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(0,245,255,0.1);
+  }
+
+  .product-badge {
+    position: absolute; top: 1rem; left: 1rem;
+    z-index: 2;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    padding: 0.25rem 0.6rem;
+    text-transform: uppercase;
+  }
+
+  .badge-new { background: var(--neon-cyan); color: var(--dark-base); }
+  .badge-hot { background: var(--neon-pink); color: white; }
+  .badge-sale { background: var(--neon-green); color: var(--dark-base); }
+  .badge-ltd { background: var(--neon-purple); color: white; }
+
+  .product-img {
+    height: 220px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-img-bg {
+    position: absolute; inset: 0;
+    opacity: 0.15;
+    transition: opacity 0.4s;
+  }
+  .product-card:hover .product-img-bg { opacity: 0.25; }
+
+  .product-emoji {
+    font-size: 5rem;
+    position: relative; z-index: 1;
+    filter: drop-shadow(0 0 20px rgba(0,245,255,0.3));
+    transition: transform 0.4s;
+  }
+  .product-card:hover .product-emoji {
+    transform: scale(1.1) translateY(-4px);
+  }
+
+  .product-info {
+    padding: 1.2rem;
+    border-top: 1px solid var(--border-glow);
+  }
+
+  .product-cat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .product-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .product-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .product-price {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--neon-cyan);
+  }
+  .product-price .old {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: line-through;
+    margin-left: 0.4rem;
+    font-weight: 400;
+  }
+
+  .product-add {
+    width: 36px; height: 36px;
+    background: transparent;
+    border: 1px solid var(--neon-pink);
+    color: var(--neon-pink);
+    display: flex; align-items: center; justify-content: center;
+    cursor: none;
+    font-size: 1.2rem;
+    transition: all 0.3s;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+  .product-add:hover {
+    background: var(--neon-pink);
+    color: white;
+    box-shadow: 0 0 20px rgba(255,0,110,0.4);
+  }
+
+  .product-stars {
+    font-size: 0.65rem;
+    color: #ffcc00;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== BANNER ===== */
+  #banner {
+    margin: 0 4rem;
+    padding: 5rem;
+    background: var(--dark-3);
+    border: 1px solid rgba(0,245,255,0.1);
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+  }
+
+  .banner-glow-1 {
+    position: absolute; top: -100px; left: 10%;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,245,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .banner-glow-2 {
+    position: absolute; bottom: -100px; right: 10%;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,0,110,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .banner-content {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .banner-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--neon-pink);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .banner-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--text-bright);
+    margin-bottom: 1rem;
+  }
+
+  .banner-title .highlight {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 30px rgba(0,245,255,0.4);
+  }
+
+  .banner-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    max-width: 500px;
+  }
+
+  .countdown {
+    display: flex; gap: 1.5rem;
+  }
+
+  .countdown-item {
+    text-align: center;
+    min-width: 70px;
+    padding: 0.8rem;
+    background: rgba(0,245,255,0.05);
+    border: 1px solid rgba(0,245,255,0.2);
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  .countdown-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 15px rgba(0,245,255,0.5);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .countdown-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    margin-top: 8rem;
+    padding: 4rem;
+    background: var(--dark-2);
+    border-top: 1px solid var(--border-glow);
+    position: relative; z-index: 2;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  .footer-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px rgba(0,245,255,0.3);
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .footer-desc {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-heading {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .footer-links a {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--neon-cyan); }
+
+  .footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-glow);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .footer-copy {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .social-links { display: flex; gap: 1rem; }
+  .social-link {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border-glow);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.75rem;
+    transition: all 0.3s;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .social-link:hover {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0,245,255,0.2);
+  }
+
+  /* ===== ANIMATIONS ===== */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes glitch {
+    0%, 100% { text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-cyan); }
+    25% { text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-cyan); }
+    50% { text-shadow: -2px 0 var(--neon-purple), 2px 0 var(--neon-green); }
+    75% { text-shadow: 2px 0 var(--neon-purple), -2px 0 var(--neon-green); }
+  }
+
+  .hero-title .line-1 { animation: glitch 6s ease-in-out infinite; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    box-shadow: 0 0 6px var(--neon-green);
+    margin-right: 6px;
+    animation: pulse-dot 2s ease infinite;
+  }
+
+  /* Noise overlay */
+  .noise {
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div class="noise"></div>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <a href="#" class="nav-logo">NEX<span>US</span></a>
+  <ul class="nav-links">
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#">Drops</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="nav-btn">Sign In</button>
+    <div class="cart-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="cart-count">3</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="status-dot"></span>
+      System online — 2049 collection live
+    </div>
+    <h1 class="hero-title">
+      <div class="line-1">THE</div>
+      <div class="line-2">FUTURE</div>
+      <div class="line-3">IS NOW</div>
+    </h1>
+    <p class="hero-desc">
+      Premium tech, fashion, and lifestyle products from the next decade. Engineered for those who move faster than tomorrow.
+    </p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Explore Products</button>
+      <button class="btn-secondary" onclick="document.getElementById('categories').scrollIntoView({behavior:'smooth'})">Browse Categories</button>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">12K+</div>
+      <div class="stat-label">Products</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">98%</div>
+      <div class="stat-label">Satisfaction</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">50+</div>
+      <div class="stat-label">Countries</div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="orb-container">
+      <div class="orb-ring orb-ring-1"></div>
+      <div class="orb-ring orb-ring-2"></div>
+      <div class="orb-ring orb-ring-3"></div>
+      <div class="orb-glow"></div>
+      <div class="orb-core"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TICKER ===== -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="dot"></span> NEXUS PRO X1 <span class="up">▲ 24% OFF</span></span>
+    <span class="ticker-item"><span class="dot"></span> NEW DROP: CYBER KICKS 2049</span>
+    <span class="ticker-item"><span class="dot"></span> HOLO-DISPLAY v3 <span class="up">IN STOCK</span></span>
+    <span class="ticker-item"><span class="dot"></span> FLASH SALE: 48H LEFT <span class="down">−60%</span></span>
+    <span class="ticker-item"><span class="dot"></span> QUANTUM AUDIO PODS</span>
+    <span class="ticker-item"><span class="dot"></span> FREE SHIPPING OVER ₹1999</span>
+    <span class="ticker-item"><span class="dot"></span> NEURAL SMARTWATCH <span class="up">NEW</span></span>
+    <span class="ticker-item"><span class="dot"></span> NEXUS PRO X1 <span class="up">▲ 24% OFF</span></span>
+    <span class="ticker-item"><span class="dot"></span> NEW DROP: CYBER KICKS 2049</span>
+    <span class="ticker-item"><span class="dot"></span> HOLO-DISPLAY v3 <span class="up">IN STOCK</span></span>
+    <span class="ticker-item"><span class="dot"></span> FLASH SALE: 48H LEFT <span class="down">−60%</span></span>
+    <span class="ticker-item"><span class="dot"></span> QUANTUM AUDIO PODS</span>
+    <span class="ticker-item"><span class="dot"></span> FREE SHIPPING OVER ₹1999</span>
+    <span class="ticker-item"><span class="dot"></span> NEURAL SMARTWATCH <span class="up">NEW</span></span>
+  </div>
+</div>
+
+<!-- ===== CATEGORIES ===== -->
+<section id="categories">
+  <div class="section-header fade-in">
+    <span class="section-tag">// Browse by category</span>
+    <h2 class="section-title">Explore <em>Worlds</em></h2>
+  </div>
+  <div class="categories-grid fade-in">
+
+    <!-- Large card: Tech -->
+    <div class="cat-card cat-tech" style="grid-row: span 2; height: auto;">
+      <div class="cat-bg cat-bg-tech"></div>
+      <svg class="cat-pattern cat-tech" viewBox="0 0 400 640" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+        <line class="cat-pattern-svg" x1="0" y1="100" x2="400" y2="100" stroke-width="0.5"/>
+        <line class="cat-pattern-svg" x1="0" y1="200" x2="400" y2="200" stroke-width="0.5"/>
+        <line class="cat-pattern-svg" x1="0" y1="300" x2="400" y2="300" stroke-width="0.5"/>
+        <line class="cat-pattern-svg" x1="100" y1="0" x2="100" y2="640" stroke-width="0.5"/>
+        <line class="cat-pattern-svg" x1="200" y1="0" x2="200" y2="640" stroke-width="0.5"/>
+        <line class="cat-pattern-svg" x1="300" y1="0" x2="300" y2="640" stroke-width="0.5"/>
+        <circle class="cat-pattern-svg" cx="200" cy="250" r="80" fill="none" stroke-width="0.5"/>
+        <circle class="cat-pattern-svg" cx="200" cy="250" r="120" fill="none" stroke-width="0.5"/>
+      </svg>
+      <div class="cat-glow"></div>
+      <div class="cat-border"></div>
+      <div class="cat-icon">⚡</div>
+      <div class="cat-content">
+        <div class="cat-tag">Category 01</div>
+        <div class="cat-name">Tech & Gadgets</div>
+        <div class="cat-count">3,482 products</div>
+        <div class="cat-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Fashion -->
+    <div class="cat-card cat-fashion">
+      <div class="cat-bg cat-bg-fashion"></div>
+      <div class="cat-glow"></div>
+      <div class="cat-border"></div>
+      <div class="cat-icon">👗</div>
+      <div class="cat-content">
+        <div class="cat-tag">Category 02</div>
+        <div class="cat-name">Fashion</div>
+        <div class="cat-count">2,916 products</div>
+        <div class="cat-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Audio -->
+    <div class="cat-card cat-audio">
+      <div class="cat-bg cat-bg-audio"></div>
+      <div class="cat-glow"></div>
+      <div class="cat-border"></div>
+      <div class="cat-icon">🎧</div>
+      <div class="cat-content">
+        <div class="cat-tag">Category 03</div>
+        <div class="cat-name">Audio</div>
+        <div class="cat-count">1,240 products</div>
+        <div class="cat-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Home -->
+    <div class="cat-card cat-home">
+      <div class="cat-bg cat-bg-home"></div>
+      <div class="cat-glow"></div>
+      <div class="cat-border"></div>
+      <div class="cat-icon">🏠</div>
+      <div class="cat-content">
+        <div class="cat-tag">Category 04</div>
+        <div class="cat-name">Smart Home</div>
+        <div class="cat-count">987 products</div>
+        <div class="cat-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Sports -->
+    <div class="cat-card cat-sports" style="grid-column: span 2;">
+      <div class="cat-bg cat-bg-sports"></div>
+      <div class="cat-glow"></div>
+      <div class="cat-border"></div>
+      <div class="cat-icon">🏃</div>
+      <div class="cat-content">
+        <div class="cat-tag">Category 05</div>
+        <div class="cat-name">Sports & Fitness</div>
+        <div class="cat-count">2,103 products</div>
+        <div class="cat-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BANNER ===== -->
+<div id="banner" class="fade-in">
+  <div class="banner-glow-1"></div>
+  <div class="banner-glow-2"></div>
+  <div class="banner-content">
+    <div>
+      <div class="banner-tag">// Limited time offer</div>
+      <h2 class="banner-title">MEGA DROP<br><span class="highlight">48 HOURS</span> ONLY</h2>
+      <p class="banner-desc">Exclusive discounts on our most sought-after items. Once it's gone, it's gone — forever.</p>
+      <button class="btn-primary">Shop the Drop</button>
+    </div>
+    <div class="countdown" id="countdown">
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-h">47</div>
+        <div class="countdown-label">Hours</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-m">32</div>
+        <div class="countdown-label">Mins</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-s">09</div>
+        <div class="countdown-label">Secs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PRODUCTS ===== -->
+<section id="products">
+  <div class="section-header fade-in">
+    <span class="section-tag">// Hot right now</span>
+    <h2 class="section-title">Featured <em>Products</em></h2>
+  </div>
+
+  <div class="products-filter fade-in">
+    <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+    <button class="filter-btn" onclick="filterProducts('tech', this)">Tech</button>
+    <button class="filter-btn" onclick="filterProducts('fashion', this)">Fashion</button>
+    <button class="filter-btn" onclick="filterProducts('audio', this)">Audio</button>
+    <button class="filter-btn" onclick="filterProducts('home', this)">Home</button>
+    <button class="filter-btn" onclick="filterProducts('sports', this)">Sports</button>
+  </div>
+
+  <div class="products-grid fade-in" id="products-grid">
+
+    <div class="product-card" data-cat="tech">
+      <span class="product-badge badge-new">New</span>
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(0,245,255,0.3), transparent 70%)"></div>
+        <span class="product-emoji">🖥️</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Tech</div>
+        <div class="product-stars">★★★★★</div>
+        <div class="product-name">Holographic Display Pro X1</div>
+        <div class="product-bottom">
+          <div class="product-price">₹89,999<span class="old">₹1,10,000</span></div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="fashion">
+      <span class="product-badge badge-hot">Hot</span>
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(255,0,110,0.3), transparent 70%)"></div>
+        <span class="product-emoji">🥷</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Fashion</div>
+        <div class="product-stars">★★★★☆</div>
+        <div class="product-name">Cyber Stealth Jacket 2049</div>
+        <div class="product-bottom">
+          <div class="product-price">₹14,999</div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="audio">
+      <span class="product-badge badge-sale">−40%</span>
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(0,255,159,0.3), transparent 70%)"></div>
+        <span class="product-emoji">🎧</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Audio</div>
+        <div class="product-stars">★★★★★</div>
+        <div class="product-name">Quantum Neural Pods Ultra</div>
+        <div class="product-bottom">
+          <div class="product-price">₹11,999<span class="old">₹19,999</span></div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="tech">
+      <span class="product-badge badge-ltd">Ltd</span>
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(155,0,255,0.3), transparent 70%)"></div>
+        <span class="product-emoji">⌚</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Tech</div>
+        <div class="product-stars">★★★★★</div>
+        <div class="product-name">Neural Smartwatch Gen 4</div>
+        <div class="product-bottom">
+          <div class="product-price">₹44,999</div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="sports">
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(155,0,255,0.3), transparent 70%)"></div>
+        <span class="product-emoji">👟</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Sports</div>
+        <div class="product-stars">★★★★☆</div>
+        <div class="product-name">Cyber Boost Running Kicks</div>
+        <div class="product-bottom">
+          <div class="product-price">₹12,499</div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="home">
+      <span class="product-badge badge-new">New</span>
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(255,204,0,0.2), transparent 70%)"></div>
+        <span class="product-emoji">💡</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Home</div>
+        <div class="product-stars">★★★★★</div>
+        <div class="product-name">AI Ambient Light System</div>
+        <div class="product-bottom">
+          <div class="product-price">₹8,999</div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="tech">
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(0,245,255,0.2), transparent 70%)"></div>
+        <span class="product-emoji">🕶️</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Tech</div>
+        <div class="product-stars">★★★★☆</div>
+        <div class="product-name">AR Vision Glasses X</div>
+        <div class="product-bottom">
+          <div class="product-price">₹54,999<span class="old">₹74,999</span></div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="fashion">
+      <span class="product-badge badge-hot">Hot</span>
+      <div class="product-img">
+        <div class="product-img-bg" style="background: radial-gradient(circle, rgba(255,0,110,0.2), transparent 70%)"></div>
+        <span class="product-emoji">💍</span>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">Fashion</div>
+        <div class="product-stars">★★★★★</div>
+        <div class="product-name">Smart Ring NFC Edition</div>
+        <div class="product-bottom">
+          <div class="product-price">₹6,499</div>
+          <button class="product-add" onclick="addToCart(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <span class="footer-logo">NEXUS</span>
+      <p class="footer-desc">The future of commerce is here. Premium products engineered for the next generation of human experience.</p>
+      <div style="font-family: 'Share Tech Mono'; font-size: 0.65rem; color: var(--neon-green); letter-spacing: 0.2em;">
+        <span class="status-dot"></span>All systems operational
+      </div>
+    </div>
+    <div>
+      <div class="footer-heading">// Shop</div>
+      <ul class="footer-links">
+        <li><a href="#">New Arrivals</a></li>
+        <li><a href="#">Best Sellers</a></li>
+        <li><a href="#">Flash Deals</a></li>
+        <li><a href="#">Bundles</a></li>
+        <li><a href="#">Wishlist</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">// Support</div>
+      <ul class="footer-links">
+        <li><a href="#">Track Order</a></li>
+        <li><a href="#">Returns</a></li>
+        <li><a href="#">Warranty</a></li>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">// Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About Nexus</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2049 NEXUS CORP. ALL RIGHTS RESERVED.</span>
+    <div class="social-links">
+      <a href="#" class="social-link">TW</a>
+      <a href="#" class="social-link">IG</a>
+      <a href="#" class="social-link">DC</a>
+      <a href="#" class="social-link">YT</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    setTimeout(() => {
+      ring.style.left = e.clientX + 'px';
+      ring.style.top = e.clientY + 'px';
+    }, 80);
+  });
+
+  // Scroll fade-in
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Product filter
+  function filterProducts(cat, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.product-card').forEach(card => {
+      const show = cat === 'all' || card.dataset.cat === cat;
+      card.style.transition = 'all 0.3s';
+      card.style.opacity = show ? '1' : '0.2';
+      card.style.transform = show ? '' : 'scale(0.95)';
+    });
+  }
+
+  // Add to cart
+  let cartCount = 3;
+  function addToCart(btn) {
+    cartCount++;
+    document.querySelector('.cart-count').textContent = cartCount;
+    btn.textContent = '✓';
+    btn.style.background = 'var(--neon-green)';
+    btn.style.borderColor = 'var(--neon-green)';
+    btn.style.color = 'var(--dark-base)';
+    setTimeout(() => {
+      btn.textContent = '+';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 1500);
+  }
+
+  // Countdown timer
+  let totalSecs = 47 * 3600 + 32 * 60 + 9;
+  function updateCountdown() {
+    totalSecs--;
+    if (totalSecs < 0) totalSecs = 0;
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+    document.getElementById('cd-h').textContent = String(h).padStart(2, '0');
+    document.getElementById('cd-m').textContent = String(m).padStart(2, '0');
+    document.getElementById('cd-s').textContent = String(s).padStart(2, '0');
+  }
+  setInterval(updateCountdown, 1000);
+</script>
+</body>
+</html>
